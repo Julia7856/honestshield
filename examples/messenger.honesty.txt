@@ -1,0 +1,31 @@
+# HONESTY.TXT — v1
+App: com.julia.lantern
+Host: lantern.example.com
+Version: 1.4.2
+Contact: privacy@lantern.example.com
+Updated: 2026-09-02
+Expires: 2027-03-02
+
+## DATA
+messages: purpose=messaging; retain=session; shared=none
+contacts: purpose=friend-discovery; retain=user-forever; shared=none
+
+## THIRD-PARTIES
+none
+
+## TRACKERS
+none
+
+## PERMISSIONS
+network: core-function
+notifications: message-alerts
+
+## PROMISES
+sell-data: no
+ad-identifiers: no
+delete-on-request: yes-24h
+breach-notify: yes-72h
+encryption: yes-e2ee
+
+## SIGNATURE
+badge: pending-first-audit
