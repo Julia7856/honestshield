@@ -1,8 +1,8 @@
 # HONESTY.TXT — v1
-App: com.julia.lantern
-Host: lantern.example.com
+App: com.example.messenger
+Host: messenger.example.com
 Version: 1.4.2
-Contact: privacy@lantern.example.com
+Contact: privacy@messenger.example.com
 Updated: 2026-09-02
 Expires: 2027-03-02
 
