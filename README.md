@@ -1,3 +1,5 @@
+[![validate-examples](https://github.com/Julia7856/honestshield/actions/workflows/validate.yml/badge.svg)](https://github.com/Julia7856/honestshield/actions/workflows/validate.yml)
+
 # HonestShield
 
 Сертификат честности для приложений.
@@ -26,6 +28,17 @@ HonestShield делает приватность **видимой**:
 ## Стандарт
 
 Смотри [STANDARD.md](STANDARD.md) — полная спецификация honesty.txt.
+
+## Валидатор
+
+Эталонная реализация — `validator/validate.py` (чистый Python, без зависимостей):
+
+```bash
+python validator/validate.py examples/shop.honesty.txt
+python validator/validate.py --url https://example.com
+```
+
+GitHub Actions прогоняет проверку при каждом коммите — значок сверху живое доказательство.
 
 ## Пример honesty.txt
 
