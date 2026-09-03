@@ -37,13 +37,15 @@ def parse(text, rep):
     section = None
     for n, raw in enumerate(text.splitlines(), 1):
         line = raw.strip()
-        if not line or line.startswith("#"):
+        if not line:
             continue
         if line.startswith("## "):
             section = line[3:].strip()
             if section not in KNOWN_SECTIONS:
                 rep.warn(f"line {n}: unknown section '## {section}'")
             rep.sections.setdefault(section, [])
+            continue
+        if line.startswith("#"):
             continue
         if section == "TRACKERS" and ":" not in line:
             rep.sections[section].append((line, None, n))
@@ -113,7 +115,7 @@ def main():
 
     print("honesty.txt report")
     print(f"  header: {len(rep.header)} fields")
-    print(f"  sections: {', '.join(rep.sections) or 'none'}")
+    print(f"  sections: {', '.join(k for k in rep.sections if k) or 'none'}")
     for w in rep.warnings:
         print(f"  WARN  {w}")
     for e in rep.errors:
