@@ -1,3 +1,30 @@
+# NOTICE — purpose and scope of use
+
+## 1. Purpose
+
+HonestShield is a technical tool for informing users about data handling practices. The honesty.txt format lets applications and services describe their work with data in machine-readable form.
+
+The project is intended for commercial, technical, research and educational use.
+
+## 2. Project boundaries
+
+The project is a transparency tool and does not provide capabilities for:
+
+- ensuring anonymity of participants;
+- concealing or encrypting traffic;
+- bypassing technical protection measures;
+- collecting or processing personal data.
+
+## 3. Use
+
+The project is intended to be used in accordance with applicable law. Use for purposes contrary to the project's purpose or applicable law is outside the intended scope and is not covered by the project documentation.
+
+## 4. License
+
+Code and specification are distributed under the MIT license.
+
+---
+
 # NOTICE — назначение и рамки использования
 
 ## 1. Назначение
