@@ -85,6 +85,20 @@ python validator/validate.py --url https://example.com
 
 GitHub Actions runs the check on every commit — the badge above is live proof.
 
+## Badges
+
+Three states of verification:
+
+![verified](assets/badge-verified.svg) — declaration fully matches behavior.
+![warnings](assets/badge-warnings.svg) — declaration is valid, but minor issues detected.
+![failed](assets/badge-failed.svg) — declaration does not match behavior.
+
+To place a badge on your site, use:
+
+```html
+<img src="https://raw.githubusercontent.com/Julia7856/honestshield/main/assets/badge-verified.svg" alt="honesty.txt: verified" height="20">
+```
+
 ## Example honesty.txt
 
 ```txt
