@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>honesty.txt — web validator</title>
+<style>
+  body{font-family:system-ui,sans-serif;background:#0d1117;color:#e6edf3;margin:0 auto;padding:24px;max-width:720px}
+  h1{font-size:22px}
+  a{color:#58a6ff}
+  input,textarea,button{font:inherit;width:100%;box-sizing:border-box;margin:6px 0;padding:10px;border-radius:6px;border:1px solid #30363d;background:#161b22;color:#e6edf3}
+  textarea{min-height:160px;font-family:monospace;font-size:13px}
+  button{background:#238636;border:none;color:#fff;cursor:pointer}
+  .badge{display:inline-block;padding:4px 10px;border-radius:4px;font-size:13px;margin:10px 0}
+  .ok{background:#238636}.warn{background:#9e6a03}.fail{background:#da3633}
+  ul{list-style:none;padding:0}
+  li{padding:4px 0;border-bottom:1px solid #21262d;font-size:14px}
+  .yes::before{content:"✓ ";color:#3fb950}
+  .no::before{content:"✗ ";color:#f85149}
+  .wn::before{content:"! ";color:#d29922}
+</style>
+</head>
+<body>
+<h1>honesty.txt — web validator</h1>
+<p>Reference: <a href="https://github.com/Julia7856/honestshield">github.com/Julia7856/honestshield</a></p>
+<input id="url" placeholder="https://example.com (optional)">
+<button onclick="byUrl()">Check by URL</button>
+<p style="text-align:center;opacity:.6">— or paste the file below —</p>
+<textarea id="txt" placeholder="# HONESTY.TXT — v1 ..."></textarea>
+<button onclick="run(document.getElementById('txt').value)">Validate text</button>
+<div id="out"></div>
+<script>
+async function byUrl(){
+  let u=document.getElementById('url').value.trim();
+  if(!u)return;
+  if(!/^https?:\/\//.test(u))u='https://'+u;
+  if(!u.endsWith('.txt'))u=u.replace(/\/$/,'')+'/.well-known/honesty.txt';
+  const r=await fetch('https://api.allorigins.win/raw?url='+encodeURIComponent(u));
+  run(await r.text());
+}
+function run(text){
+  const header={},sections={};let cur=null;
+  for(const raw of text.split('\n')){
+    const line=raw.trim();
+    if(!line||line.startsWith('#'))continue;
+    if(line.startsWith('## ')){cur=line.slice(3).toUpperCase();sections[cur]=[];continue;}
+    if(cur===null){const m=line.match(/^([A-Za-z-]+):\s*(.*)$/);if(m)header[m[1]]=m[2];}
+    else sections[cur].push(line);
+  }
+  const checks=[];
+  const req=(ok,t,w)=>checks.push({ok,w:!!w,t});
+  ['App','Host','Contact','Updated','Expires'].forEach(k=>req(!!header[k],'Header field: '+k));
+  if(header.Expires)req(new Date(header.Expires)>new Date(),'Expires is in the future',true);
+  const data=sections.DATA||[];
+  req(data.length>0,'DATA section is not empty');
+  data.forEach(l=>{const n=l.split(':')[0];
+    req(/purpose=/.test(l),'DATA '+n+': purpose');
+    req(/retain=/.test(l),'DATA '+n+': retain',true);
+    req(/shared=/.test(l),'DATA '+n+': shared',true);});
+  req('TRACKERS' in sections,'TRACKERS section declared');
+  const pr=(sections.PROMISES||[]).join('\n');
+  req(/sell-data:\s*no/.test(pr),'PROMISES: sell-data: no');
+  req(/delete-on-request/.test(pr),'PROMISES: delete-on-request',true);
+  const fails=checks.filter(c=>!c.ok&&!c.w).length;
+  const warns=checks.filter(c=>!c.ok&&c.w).length;
+  const state=fails?'failed':(warns?'warnings':'verified');
+  const col={verified:'ok',warnings:'warn',failed:'fail'}[state];
+  let html='<div class="badge '+col+'">honesty.txt: '+state+'</div><ul>';
+  for(const c of checks){
+    const cls=c.ok?'yes':(c.w?'wn':'no');
+    html+='<li class="'+cls+'">'+c.t+'</li>';
+  }
+  document.getElementById('out').innerHTML=html+'</ul>';
+}
+</script>
+</body>
+</html>
