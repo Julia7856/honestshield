@@ -42,8 +42,8 @@ function run(text){
   const header={},sections={};let cur=null;
   for(const raw of text.split('\n')){
     const line=raw.trim();
+    if(line.startsWith('## ')){cur=line.slice(3).trim().toUpperCase();sections[cur]=[];continue;}
     if(!line||line.startsWith('#'))continue;
-    if(line.startsWith('## ')){cur=line.slice(3).toUpperCase();sections[cur]=[];continue;}
     if(cur===null){const m=line.match(/^([A-Za-z-]+):\s*(.*)$/);if(m)header[m[1]]=m[2];}
     else sections[cur].push(line);
   }
