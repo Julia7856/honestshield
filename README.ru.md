@@ -86,6 +86,20 @@ python validator/validate.py --url https://example.com
 
 GitHub Actions прогоняет проверку при каждом коммите — значок сверху живое доказательство.
 
+## Бейджи
+
+Три состояния проверки:
+
+![verified](assets/badge-verified.svg) — декларация полностью совпадает с поведением.
+![warnings](assets/badge-warnings.svg) — декларация корректна, но есть мелкие замечания.
+![failed](assets/badge-failed.svg) — декларация не совпадает с поведением.
+
+Чтобы разместить бейдж на своём сайте, используйте:
+
+```html
+<img src="https://raw.githubusercontent.com/Julia7856/honestshield/main/assets/badge-verified.svg" alt="honesty.txt: verified" height="20">
+```
+
 ## Пример honesty.txt
 
 ```txt
