@@ -1,49 +1,42 @@
-# Стандарт honesty.txt v1
+# honesty.txt — Specification v1
 
-## Формат
+Status: v1
+License: MIT (use freely)
+Reference implementation: `validator/validate.py` (pure Python, no dependencies)
 
-Файл: `/.well-known/honesty.txt`  
-Кодировка: UTF-8  
-Тип: plain text
+## 1. Purpose
 
-## Структура
+honesty.txt is a machine-readable declaration of how an application or service handles data. It lets users, auditors and automated agents verify what a service promises versus what it does.
 
-```txt
-# HONESTY.TXT — v1
-# Комментарий
+## 2. Placement and format
 
-## Поля шапки
-App: com.example.app
-Host: example.com
-Version: 42
-Contact: privacy@example.com
-Updated: 2026-09-02
-Expires: 2027-03-02
+- Path: `/.well-known/honesty.txt` (RFC 8615)
+- Encoding: UTF-8
+- Media type: `text/plain`
+- Lines starting with `#` are comments
+- Sections begin with `## NAME`
+- Fields use `key: value` syntax
 
-## DATA
-поле: purpose=зачем; retain=срок; shared=кому
+Known sections: `DATA`, `THIRD-PARTIES`, `TRACKERS`, `PERMISSIONS`, `PROMISES`, `SIGNATURE`. An unknown section produces a warning, not an error.
 
-## THIRD-PARTIES
-название: домен (описание)
+## 3. Header
 
-## TRACKERS
-none | список
+All six fields are required (missing field = validation error):
 
-## PERMISSIONS
-permission: использование
+| Field | Meaning |
+|---|---|
+| `App` | Application identifier (e.g. `com.example.app`) |
+| `Host` | Host the declaration applies to |
+| `Version` | Declaration / app revision |
+| `Contact` | Contact for data inquiries |
+| `Updated` | Date of last revision (YYYY-MM-DD) |
+| `Expires` | Date after which the declaration is stale (YYYY-MM-DD) |
 
-## PROMISES
-promise: yes|no|детали
+Date rules: `Updated` and `Expires` must be YYYY-MM-DD (else error); `Expires` must be after `Updated` (else error); a validity period longer than 1 year produces a warning.
 
-## SIGNATURE
-badge: HS-YYYY-NNNNNN
-```
+## 4. DATA
 
-## Секции
-
-### DATA
-
-Каждая строка описывает один тип данных:
+One line per data type, or `none` if no personal data is collected:
 
 ```txt
 email: purpose=auth; retain=90d; shared=none
@@ -51,54 +44,64 @@ location: purpose=delivery; retain=session; shared=none
 photos: purpose=user-content; retain=user-forever; shared=none
 ```
 
-Формат: `поле: purpose=значение; retain=срок; shared=значение`
+Format: `field: purpose=...; retain=...; shared=...` — all three keys are required on every line (missing key = validation error).
 
-**purpose** (цель):
-- auth — аутентификация
-- delivery — доставка/логистика
-- user-content — пользовательский контент
-- analytics — аналитика
-- other — другое
+**purpose** (why):
+- `auth` — authentication
+- `delivery` — delivery / logistics
+- `user-content` — user-generated content
+- `analytics` — analytics
+- `messaging`, `payment`, `friend-discovery`, `other`
 
-**retain** (срок хранения):
-- session — только на время сессии
-- 7d, 30d, 90d, 1y, 5y — дни/годы
-- user-forever — пока пользователь не удалит
-- forever — бессрочно
+**retain** (how long):
+- `session` — only during the session
+- `7d`, `30d`, `90d`, `1y`, `2y`, `5y` — days / years
+- `none` — not stored
+- `user-forever` — until the user deletes
+- `forever` — indefinite
 
-**shared** (передача третьим лицам):
-- none — никому не передаём
-- название — передаём указанной стороне
+**shared** (who receives it):
+- `none` — nobody
+- a name or domain — the named party only
 
-### THIRD-PARTIES
+## 5. THIRD-PARTIES
+
+Names every party referenced in DATA, or `none`:
 
 ```txt
 payments: stripe.com (card data never touches us)
-analytics: plausible.io (no cookies)
+delivery: cdek.ru (address only)
 ```
 
-### TRACKERS
+## 6. TRACKERS
+
+`none`, or one tracker identifier per line:
 
 ```txt
 none
 ```
-
-Или список:
 
 ```txt
 facebook
 google-analytics
 ```
 
-### PERMISSIONS
+Missing TRACKERS section produces a warning.
+
+## 7. PERMISSIONS
+
+App permissions and their use:
 
 ```txt
 camera: qr-login
 network: core-function
 microphone: voice-notes
+notifications: message-alerts
 ```
 
-### PROMISES
+## 8. PROMISES
+
+Format: `promise: yes|no|details`
 
 ```txt
 sell-data: no
@@ -108,32 +111,61 @@ breach-notify: yes-72h
 encryption: yes-aes256
 ```
 
-Формат: `обещание: yes|no|детали`
+- `sell-data` — the validator warns if not declared; a verified badge requires `sell-data: no`
+- `delete-on-request` — right to erasure, with response time
+- `breach-notify` — breach notification commitment
+- `encryption` — encryption at rest or end-to-end (e.g. `yes-e2ee`)
 
-### SIGNATURE
+## 9. SIGNATURE
+
+Link to the HonestShield certificate:
 
 ```txt
 badge: HS-2026-000042
 ```
 
-Ссылка на сертификат HonestShield.
+Before the first audit use `badge: pending-first-audit`. Missing SIGNATURE section produces a warning.
 
-## Проверка
+## 10. Validation and statuses
 
-HonestShield проверяет:
-1. Декларация корректна (синтаксис)
-2. Реальное поведение совпадает с декларацией
-3. Сертификат действителен (не истёк, не отозван)
+The validator (`validator/validate.py`) produces a report and one of three results:
 
-При несоответствии знак отзывается.
+| Validator result | Badge | Meaning |
+|---|---|---|
+| `result: OK` | verified | declaration complete and consistent |
+| `result: OK (with warnings)` | warnings | valid, but minor issues detected |
+| `result: FAIL` | failed | required fields missing or malformed |
 
-## Машиночитаемость
+Errors fail the check (missing header field, bad dates, DATA line without `purpose`/`retain`/`shared`). Warnings do not fail the check (unknown section, no TRACKERS, no SIGNATURE, validity over 1 year).
 
-ИИ-агенты могут парсить honesty.txt для автоматических решений:
-- Разрешить/запретить взаимодействие
-- Выбрать альтернативный сервис
-- Предупредить пользователя
+Dynamic audit compares the declaration against real behavior; on mismatch the badge is revoked.
 
-## Лицензия
+## 11. Machine readability
 
-Спецификация свободна для использования.
+AI agents can parse honesty.txt to make automated decisions:
+- allow or refuse interaction
+- choose an alternative service
+- warn the user
+
+## 12. Regulatory mapping
+
+Each field helps satisfy common regulatory requirements for data handling:
+
+| honesty.txt field | Typical requirement it addresses |
+|---|---|
+| `purpose` (DATA) | Purpose limitation — data collected only for stated reasons |
+| `retain` (DATA) | Storage limitation — data kept only as long as needed |
+| `shared` (DATA) + `THIRD-PARTIES` | Third-party disclosure transparency |
+| `TRACKERS` | Tracking disclosure and consent |
+| `PERMISSIONS` | Permission transparency |
+| `sell-data` (PROMISES) | Data sale opt-out / prohibition |
+| `delete-on-request` (PROMISES) | Right to erasure |
+| `breach-notify` (PROMISES) | Breach notification |
+| `Contact` (header) | Designated contact for data inquiries |
+| `Updated` / `Expires` (header) | Currency and periodic review |
+
+## 13. Badges
+
+- `assets/badge-verified.svg`
+- `assets/badge-warnings.svg`
+- `assets/badge-failed.svg`
