@@ -35,8 +35,24 @@ async function byUrl(){
   if(!u)return;
   if(!/^https?:\/\//.test(u))u='https://'+u;
   if(!u.endsWith('.txt'))u=u.replace(/\/$/,'')+'/.well-known/honesty.txt';
-  const r=await fetch('https://api.allorigins.win/raw?url='+encodeURIComponent(u));
-  run(await r.text());
+  const out=document.getElementById('out');
+  out.innerHTML='<p>Fetching…</p>';
+  let text=null;
+  try{
+    const r=await fetch(u);
+    if(r.ok)text=await r.text();
+  }catch(e){}
+  if(text===null){
+    try{
+      const r=await fetch('https://api.allorigins.win/raw?url='+encodeURIComponent(u));
+      if(r.ok)text=await r.text();
+    }catch(e){}
+  }
+  if(text===null){
+    out.innerHTML='<div class="badge fail">cannot fetch URL</div><p>The site blocks cross-origin requests and the proxy is unavailable. Paste the file text below instead.</p>';
+    return;
+  }
+  run(text);
 }
 function run(text){
   const header={},sections={};let cur=null;
