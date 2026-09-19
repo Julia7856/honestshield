@@ -40,6 +40,11 @@
   <input id="badgesnippet" readonly>
   <button onclick="copyField('badgesnippet',this)">Copy badge code</button>
 </div>
+<h2 style="margin-top:24px">Compare versions — what changed?</h2>
+<p style="opacity:.6;font-size:13px">The OLD version stays in the main field above. Paste the NEW version here:</p>
+<textarea id="txt2" placeholder="# HONESTY.TXT — v1 (new version) ..."></textarea>
+<button onclick="diffVersions()">Compare versions</button>
+<div id="diffout"></div>
 <script>
 function enc(t){return btoa(unescape(encodeURIComponent(t)));}
 function dec(s){return decodeURIComponent(escape(atob(s)));}
@@ -127,6 +132,56 @@ function copyField(id,btn){
   el.select();el.setSelectionRange(0,99999);
   try{navigator.clipboard.writeText(el.value);}catch(e){document.execCommand('copy');}
   const old=btn.textContent;btn.textContent='Copied!';setTimeout(function(){btn.textContent=old;},1500);
+}
+function parseDoc(text){
+  const header={},sections={};let cur=null;
+  for(const raw of text.split('\n')){
+    const line=raw.trim();
+    if(line.startsWith('## ')){cur=line.slice(3).trim().toUpperCase();sections[cur]=[];continue;}
+    if(!line||line.startsWith('#'))continue;
+    if(cur===null){const m=line.match(/^([A-Za-z-]+):\s*(.*)$/);if(m)header[m[1]]=m[2];}
+    else sections[cur].push(line);
+  }
+  return {header:header,sections:sections};
+}
+function diffVersions(){
+  const a=parseDoc(document.getElementById('txt').value);
+  const b=parseDoc(document.getElementById('txt2').value);
+  const rows=[];
+  const secs=[];
+  Object.keys(a.sections).forEach(function(s){if(secs.indexOf(s)<0)secs.push(s);});
+  Object.keys(b.sections).forEach(function(s){if(secs.indexOf(s)<0)secs.push(s);});
+  secs.forEach(function(s){
+    const ma={},mb={};
+    (a.sections[s]||[]).forEach(function(l){ma[l.split(':')[0]]=l;});
+    (b.sections[s]||[]).forEach(function(l){mb[l.split(':')[0]]=l;});
+    Object.keys(ma).forEach(function(k){
+      if(!(k in mb))rows.push({c:'no',t:s+': removed → '+ma[k]});
+      else if(ma[k]!==mb[k])rows.push({c:'wn',t:s+': changed → '+ma[k]+' ⇒ '+mb[k]});
+    });
+    Object.keys(mb).forEach(function(k){
+      if(!(k in ma))rows.push({c:'yes',t:s+': added → '+mb[k]});
+    });
+  });
+  const pa=(a.sections.PROMISES||[]).join('\n');
+  const pb=(b.sections.PROMISES||[]).join('\n');
+  const reg=[];
+  if(/sell-data:\s*no/.test(pa)&&!/sell-data:\s*no/.test(pb))reg.push('sell-data is no longer "no"');
+  if(/delete-on-request/.test(pa)&&!/delete-on-request/.test(pb))reg.push('delete-on-request promise disappeared');
+  if(/ad-identifiers:\s*no/.test(pa)&&!/ad-identifiers:\s*no/.test(pb))reg.push('ad-identifiers promise disappeared');
+  let html='';
+  if(reg.length){
+    html+='<div class="badge fail">PROMISES GOT WORSE</div><ul>';
+    reg.forEach(function(r){html+='<li class="no">'+r+'</li>';});
+    html+='</ul>';
+  }
+  if(rows.length){
+    html+='<ul>';
+    rows.forEach(function(r){html+='<li class="'+r.c+'">'+r.t+'</li>';});
+    html+='</ul>';
+  }
+  if(!reg.length&&!rows.length)html='<div class="badge ok">no changes detected</div>';
+  document.getElementById('diffout').innerHTML=html;
 }
 window.addEventListener('load',function(){
   const m=location.hash.match(/^#check=(.+)$/);
