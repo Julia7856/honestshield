@@ -1,0 +1,36 @@
+name: registry-check
+
+on:
+  schedule:
+    - cron: '0 6 * * *'
+  workflow_dispatch:
+  push:
+    paths:
+      - registry.json
+      - validator/check_registry.py
+      - .github/workflows/registry-check.yml
+
+permissions:
+  contents: write
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Re-check registry
+        run: python validator/check_registry.py
+      - name: Commit status page
+        run: |
+          git config user.name "honestshield-bot"
+          git config user.email "bot@honestshield.local"
+          git add docs/status.html
+          if git diff --cached --quiet; then
+            echo "no changes to commit"
+          else
+            git commit -m "chore: update registry status"
+            git push
+          fi
