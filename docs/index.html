@@ -20,6 +20,7 @@
   .yes::before{content:"✓ ";color:#3fb950}
   .no::before{content:"✗ ";color:#f85149}
   .wn::before{content:"! ";color:#d29922}
+  .inf::before{content:"⏳ ";color:#58a6ff}
 </style>
 </head>
 <body>
@@ -79,6 +80,22 @@ function run(text){
   const req=(ok,t,w)=>checks.push({ok,w:!!w,t});
   ['App','Host','Contact','Updated','Expires'].forEach(k=>req(!!header[k],'Header field: '+k));
   if(header.Expires)req(new Date(header.Expires)>new Date(),'Expires is in the future',true);
+  if(header.Expires){
+    const ex=new Date(header.Expires);
+    if(!isNaN(ex)){
+      const d=Math.ceil((ex-Date.now())/86400000);
+      if(d>=0&&d<30)checks.push({ok:false,w:true,t:'Expires soon: '+d+' day(s) left'});
+      else if(d>=0)checks.push({i:true,ok:true,t:'Expires in '+d+' days'});
+    }
+  }
+  if(header.Updated){
+    const up=new Date(header.Updated);
+    if(!isNaN(up)){
+      const du=Math.floor((Date.now()-up)/86400000);
+      if(du>=0&&du>365)checks.push({ok:false,w:true,t:'Stale declaration: updated '+du+' days ago'});
+      else if(du>=0)checks.push({i:true,ok:true,t:'Updated '+du+' days ago'});
+    }
+  }
   const data=sections.DATA||[];
   req(data.length>0,'DATA section is not empty');
   data.forEach(l=>{const n=l.split(':')[0];
@@ -95,7 +112,7 @@ function run(text){
   const col={verified:'ok',warnings:'warn',failed:'fail'}[state];
   let html='<div class="badge '+col+'">honesty.txt: '+state+'</div><ul>';
   for(const c of checks){
-    const cls=c.ok?'yes':(c.w?'wn':'no');
+    const cls=c.i?'inf':(c.ok?'yes':(c.w?'wn':'no'));
     html+='<li class="'+cls+'">'+c.t+'</li>';
   }
   document.getElementById('out').innerHTML=html+'</ul>';
