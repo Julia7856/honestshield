@@ -7,8 +7,10 @@
 <style>
   body{font-family:system-ui,sans-serif;background:#0d1117;color:#e6edf3;margin:0 auto;padding:24px;max-width:720px}
   h1{font-size:22px}
+  h2{font-size:16px;margin-top:18px}
   a{color:#58a6ff}
   input,textarea,button{font:inherit;width:100%;box-sizing:border-box;margin:6px 0;padding:10px;border-radius:6px;border:1px solid #30363d;background:#161b22;color:#e6edf3}
+  input[readonly]{font-family:monospace;font-size:12px}
   textarea{min-height:160px;font-family:monospace;font-size:13px}
   button{background:#238636;border:none;color:#fff;cursor:pointer}
   .badge{display:inline-block;padding:4px 10px;border-radius:4px;font-size:13px;margin:10px 0}
@@ -29,7 +31,17 @@
 <textarea id="txt" placeholder="# HONESTY.TXT — v1 ..."></textarea>
 <button onclick="run(document.getElementById('txt').value)">Validate text</button>
 <div id="out"></div>
+<div id="extra" style="display:none">
+  <h2>Share the report</h2>
+  <input id="shareurl" readonly>
+  <button onclick="copyField('shareurl',this)">Copy link</button>
+  <h2>Badge for the site</h2>
+  <input id="badgesnippet" readonly>
+  <button onclick="copyField('badgesnippet',this)">Copy badge code</button>
+</div>
 <script>
+function enc(t){return btoa(unescape(encodeURIComponent(t)));}
+function dec(s){return decodeURIComponent(escape(atob(s)));}
 async function byUrl(){
   let u=document.getElementById('url').value.trim();
   if(!u)return;
@@ -87,7 +99,22 @@ function run(text){
     html+='<li class="'+cls+'">'+c.t+'</li>';
   }
   document.getElementById('out').innerHTML=html+'</ul>';
+  const base=location.href.split('#')[0];
+  document.getElementById('shareurl').value=base+'#check='+enc(text);
+  const badge={verified:'badge-verified.svg',warnings:'badge-warnings.svg',failed:'badge-failed.svg'}[state];
+  document.getElementById('badgesnippet').value='<img src="https://raw.githubusercontent.com/Julia7856/honestshield/main/assets/'+badge+'" alt="honesty.txt: '+state+'" height="20">';
+  document.getElementById('extra').style.display='block';
 }
+function copyField(id,btn){
+  const el=document.getElementById(id);
+  el.select();el.setSelectionRange(0,99999);
+  try{navigator.clipboard.writeText(el.value);}catch(e){document.execCommand('copy');}
+  const old=btn.textContent;btn.textContent='Copied!';setTimeout(function(){btn.textContent=old;},1500);
+}
+window.addEventListener('load',function(){
+  const m=location.hash.match(/^#check=(.+)$/);
+  if(m){try{const t=dec(m[1]);document.getElementById('txt').value=t;run(t);}catch(e){}}
+});
 </script>
 </body>
 </html>
