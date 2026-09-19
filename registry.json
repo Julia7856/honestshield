@@ -1,0 +1,8 @@
+{
+  "services": [
+    {
+      "name": "HonestShield demo shop",
+      "url": "https://raw.githubusercontent.com/Julia7856/honestshield/main/examples/shop.honesty.txt"
+    }
+  ]
+}
