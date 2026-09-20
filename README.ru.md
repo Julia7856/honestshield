@@ -1,4 +1,4 @@
-[![validate-examples](https://github.com/Julia7856/honestshield/actions/workflows/validate.yml/badge.svg)](https://github.com/Julia7856/honestshield/actions/workflows/validate.yml)
+[![validate-examples](https://github.com/Julia7856/honestshield/workflows/validate-examples/badge.svg)](https://github.com/Julia7856/honestshield/actions)
 
 [English](README.md) | **Русский**
 
@@ -26,24 +26,29 @@ HonestShield делает работу с данными **прозрачной*
 3. Динамический аудит проверяет реальный трафик
 4. Сверка: декларация против поведения
 5. Выдача или отзыв сертификата
+6. Ежедневный бот перепроверяет каждый зарегистрированный сервис — результаты открыты
+
+## Живые инструменты
+
+- **Веб-валидатор**: https://julia7856.github.io/honestshield/ — проверка любой декларации в браузере, ссылка-отчёт, копирование бейджа
+- **Статус реестра**: https://julia7856.github.io/honestshield/status.html — кто честен сегодня, обновляется каждый день через GitHub Actions
 
 ## Как внедрить за 5 минут
 
 ### Шаг 1. Создай honesty.txt
 
-Скопируй [пример](examples/shop.honesty.txt) и замени данные на свои. Обязательно заполни:
+Скопируй пример и замени данные на свои. Обязательно заполни:
 - шапку (App, Host, Contact, даты)
 - секцию DATA (какие данные и зачем)
 - секцию PROMISES (`sell-data: no` обязательно)
 
 ### Шаг 2. Положи по адресу
 
-Файл должен быть доступен по пути:
 ```
 https://твой-сайт.com/.well-known/honesty.txt
 ```
 
-Это [RFC 8615](https://www.rfc-editor.org/rfc/rfc8615) — стандартное место для метаданных сайта.
+Это RFC 8615 — стандартное место для метаданных сайта.
 
 ### Шаг 3. Прогони валидатор
 
@@ -57,9 +62,11 @@ python validator/validate.py honesty.txt
 python validator/validate.py --url https://твой-сайт.com
 ```
 
+Или в браузере: [веб-валидатор](https://julia7856.github.io/honestshield/).
+
 Должно быть `result: OK` (warnings допустимы).
 
-### Шаг 4. Добавь ссылку в футере
+### Шаг 4. Добавь ссылку в футер
 
 ```html
 <footer>
@@ -69,11 +76,15 @@ python validator/validate.py --url https://твой-сайт.com
 
 ### Шаг 5 (опционально). Добавь бейдж
 
-Когда появится система сертификации — добавим зелёный значок «honesty.txt verified».
+Бейджи уже существуют — скопируй готовый сниппет из веб-валидатора (он подберёт нужный по результату), или используй:
+
+```html
+<img src="https://raw.githubusercontent.com/Julia7856/honestshield/main/assets/badge-verified.svg" alt="honesty.txt: verified" height="20">
+```
 
 ## Стандарт
 
-Смотри [STANDARD.md](STANDARD.md) — полная спецификация honesty.txt.
+Смотри STANDARD.md — полная спецификация honesty.txt.
 
 ## Валидатор
 
