@@ -1,4 +1,4 @@
-[![validate-examples](https://github.com/Julia7856/honestshield/actions/workflows/validate.yml/badge.svg)](https://github.com/Julia7856/honestshield/actions/workflows/validate.yml)
+[![validate-examples](https://github.com/Julia7856/honestshield/workflows/validate-examples/badge.svg)](https://github.com/Julia7856/honestshield/actions)
 
 **English** | [Русский](README.ru.md)
 
@@ -26,23 +26,23 @@ HonestShield makes data handling **transparent**:
 3. A dynamic audit checks real traffic
 4. Cross-check: declaration vs. behavior
 5. Issue or revoke the certificate
+6. A daily bot re-checks every registered service — results are public
+
+## Live tools
+
+- **Web validator**: https://julia7856.github.io/honestshield/ — check any declaration in the browser, share a report link, copy a badge snippet
+- **Registry status**: https://julia7856.github.io/honestshield/status.html — who is honest today, updated daily by GitHub Actions
 
 ## Adopt it in 5 minutes
 
 ### Step 1. Create honesty.txt
 
-Copy the [example](examples/shop.honesty.txt) and fill in your data. Required:
+Copy the example and fill in your data. Required:
 - header (App, Host, Contact, dates)
 - DATA section (what data and why)
 - PROMISES section (`sell-data: no` is mandatory)
 
-### Step 2. Place it at
-
-```
-https://your-site.com/.well-known/honesty.txt
-```
-
-This is [RFC 8615](https://www.rfc-editor.org/rfc/rfc8615) — the standard location for site metadata.
+### Step 2. Place it atThis is RFC 8615 — the standard location for site metadata.
 
 ### Step 3. Run the validator
 
@@ -56,6 +56,8 @@ Or via URL:
 python validator/validate.py --url https://your-site.com
 ```
 
+Or in the browser: [web validator](https://julia7856.github.io/honestshield/).
+
 You should see `result: OK` (warnings are fine).
 
 ### Step 4. Link it in your footer
@@ -68,11 +70,15 @@ You should see `result: OK` (warnings are fine).
 
 ### Step 5 (optional). Add a badge
 
-Once the certification system launches, we'll add a green "honesty.txt verified" badge.
+The badges already exist — copy the ready-made snippet from the web validator (it picks the exact badge for your result), or use:
+
+```html
+<img src="https://raw.githubusercontent.com/Julia7856/honestshield/main/assets/badge-verified.svg" alt="honesty.txt: verified" height="20">
+```
 
 ## The standard
 
-See [STANDARD.md](STANDARD.md) — the full honesty.txt specification.
+See STANDARD.md — the full honesty.txt specification.
 
 ## Validator
 
