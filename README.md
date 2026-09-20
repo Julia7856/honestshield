@@ -42,7 +42,13 @@ Copy the example and fill in your data. Required:
 - DATA section (what data and why)
 - PROMISES section (`sell-data: no` is mandatory)
 
-### Step 2. Place it atThis is RFC 8615 — the standard location for site metadata.
+### Step 2. Place it at
+
+```
+https://your-site.com/.well-known/honesty.txt
+```
+
+This is RFC 8615 — the standard location for site metadata.
 
 ### Step 3. Run the validator
 
